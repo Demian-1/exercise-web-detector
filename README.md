@@ -12,6 +12,7 @@ If nothing is displayed, change this number: `num`to 0, 1, 2, ... , etc:
 
 ## To run the front
 Add this in `package.json`:
+
      "private": true,
      ###"proxy": "http://127.0.0.1:5000",
      "dependencies": {
