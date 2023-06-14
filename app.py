@@ -5,13 +5,11 @@ import mediapipe as mp # Import mediapipe
 import pickle 
 
 ## to create our dataset 
-import csv 
-import os
 import numpy as np
 
 # to create the model
 import pandas as pd
-from sklearn.model_selection import train_test_split
+
 
 
 mp_drawing = mp.solutions.drawing_utils # Drawing helpers
