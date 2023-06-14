@@ -5,27 +5,31 @@ import mediapipe as mp # Import mediapipe
 import pickle 
 
 ## to create our dataset 
+import csv 
+import os
 import numpy as np
 
 # to create the model
 import pandas as pd
-
+from sklearn.model_selection import train_test_split
 
 
 mp_drawing = mp.solutions.drawing_utils # Drawing helpers
 mp_holistic = mp.solutions.holistic # Mediapipe Solutions
 
 ### CLASSIFIER
-with open('body_language.pkl', 'rb') as f:
-    model = pickle.load(f)
+
 
 app=Flask(__name__)
 
 cap = cv2.VideoCapture(1)
 
-
-
-def gen_frames():
+def gen_frames(exercise):
+    with open(exercise+'.pkl', 'rb') as f:
+        model = pickle.load(f)
+    #exercise="right-curl"
+    exercise_down=exercise+"-down"
+    exercise_up=exercise+"-up"
     counter = 0
     stage = None
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
@@ -87,6 +91,7 @@ def gen_frames():
                 body_language_class = model.predict(X)[0]
                 body_language_prob = model.predict_proba(X)[0]
                 print(body_language_class, body_language_prob)
+                
                 print(model.predict(X))
                 prob = round(body_language_prob[np.argmax(body_language_prob)],2)
                 blue, green, red = 34, 200, 203
@@ -130,7 +135,7 @@ def gen_frames():
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
                 
 
-                if stage == "right-curl-down" and body_language_class == "right-curl-up":
+                if stage == exercise_down and body_language_class == exercise_up:
                     counter += 1
 
                 stage = body_language_class
@@ -160,9 +165,9 @@ def gen_frames():
 def index():
     return render_template('index.html')
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route('/video_feed/<exercise>')
+def video_feed(exercise):
+    return Response(gen_frames(exercise), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__=='__main__':
