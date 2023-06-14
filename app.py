@@ -18,6 +18,9 @@ mp_drawing = mp.solutions.drawing_utils # Drawing helpers
 mp_holistic = mp.solutions.holistic # Mediapipe Solutions
 
 ### CLASSIFIER
+def load_model(exercise):
+    with open(exercise+'.pkl', 'rb') as f:
+            return pickle.load(f)
 
 
 app=Flask(__name__)
@@ -25,8 +28,7 @@ app=Flask(__name__)
 cap = cv2.VideoCapture(1)
 
 def gen_frames(exercise):
-    with open(exercise+'.pkl', 'rb') as f:
-        model = pickle.load(f)
+    model = load_model(exercise)
     #exercise="right-curl"
     exercise_down=exercise+"-down"
     exercise_up=exercise+"-up"
@@ -74,6 +76,8 @@ def gen_frames(exercise):
                                     mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
                                     )
             
+            
+            
             # export coordinates
             try:
                 # extracting pose landmarks
@@ -113,7 +117,8 @@ def gen_frames(exercise):
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (blue, green, red), 2, cv2.LINE_AA)
                 
                 # Get status box
-                cv2.rectangle(image, (0,0), (250, 60), (blue, green, red), -1)
+                cv2.rectangle(image, (0,0), (image.shape[1], 60), (0, 0, 0), -1)
+                
                 
                 # Display Class
                 # cv2.putText(image, 'CLASS'
@@ -123,15 +128,15 @@ def gen_frames(exercise):
                 
                 # Display Probability
                 cv2.putText(image, 'PROB'
-                            , (15,12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+                            , (15,15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
                 cv2.putText(image, str(round(body_language_prob[np.argmax(body_language_prob)],2))
-                            , (10,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                            , (10,42), cv2.FONT_HERSHEY_SIMPLEX, 1, (blue, green, red), 2, cv2.LINE_AA)
                 
                 # display reps
-                cv2.putText(image, 'REPS', (175,12), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
+                cv2.putText(image, 'REPS', (image.shape[1]-60,15), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1, cv2.LINE_AA)
                 cv2.putText(image, str(counter), 
-                        (175,40), 
+                        (image.shape[1]-51,42), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
                 
 
@@ -145,7 +150,11 @@ def gen_frames(exercise):
                 
                 
             except:
-                pass
+                cv2.rectangle(image, (0,0), (image.shape[1], 60), (0, 0, 0), -1)
+                cv2.putText(image, 'Posicionate en la imagen'
+                            , (30, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 255), 2, cv2.LINE_AA)
+
+            
 
             ret, buffer = cv2.imencode('.jpg', image)                
             frame = buffer.tobytes()
